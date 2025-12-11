@@ -1,0 +1,3 @@
+C:/Development/packages/audioplayers/packages/audioplayers_android_exo/android/.cxx/Debug/614s436t/x86_64/CMakeFiles/signalsmith_jni.dir
+C:/Development/packages/audioplayers/packages/audioplayers_android_exo/android/.cxx/Debug/614s436t/x86_64/CMakeFiles/edit_cache.dir
+C:/Development/packages/audioplayers/packages/audioplayers_android_exo/android/.cxx/Debug/614s436t/x86_64/CMakeFiles/rebuild_cache.dir

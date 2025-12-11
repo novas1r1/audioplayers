@@ -73,12 +73,12 @@ class ExoPlayerWrapper(
     private var channelMixingAudioProcessor = AdaptiveChannelMixingAudioProcessor()
     
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    private var rubberbandAudioProcessor = RubberbandAudioProcessor()
+    private var signalsmithAudioProcessor = SignalsmithAudioProcessor()
     
     private lateinit var audioSink: AudioSink
     
-    // Track whether Rubberband is available and should be used for rate changes
-    private var useRubberbandForRate = true
+    // Track whether Signalsmith is available and should be used for rate changes
+    private var useSignalsmithForRate = true
 
     init {
         player = createPlayer(appContext)
@@ -92,9 +92,9 @@ class ExoPlayerWrapper(
                 enableFloatOutput: Boolean,
                 enableAudioTrackPlaybackParams: Boolean,
             ): AudioSink {
-                // Rubberband processor comes first for time-stretching, then channel mixing for balance
+                // Signalsmith processor comes first for time-stretching, then channel mixing for balance
                 audioSink = DefaultAudioSink.Builder(appContext)
-                    .setAudioProcessors(arrayOf(rubberbandAudioProcessor, channelMixingAudioProcessor))
+                    .setAudioProcessors(arrayOf(signalsmithAudioProcessor, channelMixingAudioProcessor))
                     .build()
                 return audioSink
             }
@@ -153,30 +153,30 @@ class ExoPlayerWrapper(
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override fun setRate(rate: Float) {
-        Log.i(TAG, "setRate called: rate=$rate, useRubberbandForRate=$useRubberbandForRate")
-        if (useRubberbandForRate) {
-            // Use Rubberband for pitch-preserving time-stretching
-            Log.i(TAG, "Using Rubberband for rate change")
-            rubberbandAudioProcessor.setSpeed(rate)
-            // Keep ExoPlayer at 1.0x speed - Rubberband handles the actual tempo change
+        Log.i(TAG, "setRate called: rate=$rate, useSignalsmithForRate=$useSignalsmithForRate")
+        if (useSignalsmithForRate) {
+            // Use Signalsmith for pitch-preserving time-stretching
+            Log.i(TAG, "Using Signalsmith for rate change")
+            signalsmithAudioProcessor.setSpeed(rate)
+            // Keep ExoPlayer at 1.0x speed - Signalsmith handles the actual tempo change
             player.setPlaybackSpeed(1.0f)
         } else {
             // Fallback to native speed control (changes pitch along with speed)
             Log.i(TAG, "Using native ExoPlayer speed control")
-            rubberbandAudioProcessor.setSpeed(1.0f)
+            signalsmithAudioProcessor.setSpeed(1.0f)
             player.setPlaybackSpeed(rate)
         }
     }
     
     /**
-     * Enable or disable Rubberband time-stretching for rate changes.
+     * Enable or disable Signalsmith time-stretching for rate changes.
      * When enabled (default), playback rate changes preserve pitch.
      * When disabled, native ExoPlayer speed control is used (pitch changes with speed).
      */
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     fun setPreservePitch(preservePitch: Boolean) {
-        useRubberbandForRate = preservePitch
-        rubberbandAudioProcessor.setEnabled(preservePitch)
+        useSignalsmithForRate = preservePitch
+        signalsmithAudioProcessor.setEnabled(preservePitch)
     }
 
     override fun setLooping(looping: Boolean) {
