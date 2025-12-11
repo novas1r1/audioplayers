@@ -1,0 +1,26 @@
+# ninja log v5
+38	331	7871805374931319	CMakeFiles/rubberband_jni.dir/rubberband/src/faster/SilentAudioCurve.cpp.o	5ad6cc77803551b4
+49	355	7871805374921318	CMakeFiles/rubberband_jni.dir/rubberband/src/faster/HighFrequencyAudioCurve.cpp.o	9afde408a44d0497
+83	1259	7871805383908077	CMakeFiles/rubberband_jni.dir/rubberband/src/faster/PercussiveAudioCurve.cpp.o	a64c6bff6719cef2
+96	1273	7871805384013271	CMakeFiles/rubberband_jni.dir/rubberband/src/common/Allocators.cpp.o	4981db86db865758
+146	1313	7871805384013271	CMakeFiles/rubberband_jni.dir/rubberband/src/common/Log.cpp.o	9100f40dd3245157
+355	1345	7871805384829778	CMakeFiles/rubberband_jni.dir/rubberband/src/common/Profiler.cpp.o	7653fa5c554668e3
+27	1367	7871805385084675	CMakeFiles/rubberband_jni.dir/rubberband/src/rubberband-c.cpp.o	eba4d7646fbba415
+10	1433	7871805385918086	CMakeFiles/rubberband_jni.dir/rubberband/src/faster/AudioCurveCalculator.cpp.o	bd934970134665d
+19	1526	7871805386773752	CMakeFiles/rubberband_jni.dir/rubberband/src/faster/CompoundAudioCurve.cpp.o	189efe552badfc0e
+1434	1869	7871805390009510	CMakeFiles/rubberband_jni.dir/rubberband/src/common/VectorOpsComplex.cpp.o	26d7fa34966a656d
+1345	1976	7871805391220633	CMakeFiles/rubberband_jni.dir/rubberband/src/common/mathmisc.cpp.o	d71f8c8f2897453b
+61	2328	7871805394272906	CMakeFiles/rubberband_jni.dir/rubberband/src/faster/StretcherChannelData.cpp.o	ed4e09ffb63db292
+173	2637	7871805397597938	CMakeFiles/rubberband_jni.dir/rubberband/src/common/BQResampler.cpp.o	bda59eb5721a7f02
+1368	2798	7871805399327100	CMakeFiles/rubberband_jni.dir/rubberband/src/common/sysutils.cpp.o	6ae74b7805da7ff4
+1313	2980	7871805401387120	CMakeFiles/rubberband_jni.dir/rubberband/src/common/Thread.cpp.o	da0c356ef2ca95b9
+118	3094	7871805402499859	CMakeFiles/rubberband_jni.dir/rubberband/src/faster/StretcherProcess.cpp.o	678e6ebfb0b23140
+2	3103	7871805402585082	CMakeFiles/rubberband_jni.dir/rubberband/src/RubberBandStretcher.cpp.o	a096bc77168752d4
+1273	3136	7871805403001165	CMakeFiles/rubberband_jni.dir/rubberband/src/common/Resampler.cpp.o	8dfb33a8351ebeec
+1526	3189	7871805403542430	CMakeFiles/rubberband_jni.dir/rubberband_jni.cpp.o	59c28ca201424f3b
+341	3601	7871805407633422	CMakeFiles/rubberband_jni.dir/rubberband/src/common/FFT.cpp.o	2c60cb00ff762fa1
+73	3939	7871805411029813	CMakeFiles/rubberband_jni.dir/rubberband/src/faster/R2Stretcher.cpp.o	2967012b4db06f45
+1261	4214	7871805413804606	CMakeFiles/rubberband_jni.dir/rubberband/src/common/StretchCalculator.cpp.o	67f0f4ebf6e287f2
+134	5019	7871805421781873	CMakeFiles/rubberband_jni.dir/rubberband/src/finer/R3Stretcher.cpp.o	2ee2b8651a9b6708
+5019	5150	7871805423114373	C:/Development/repeatlab/repeatlab_app/build/audioplayers_android_exo/intermediates/cxx/Debug/5w3w4f44/obj/x86_64/librubberband_jni.so	2b64e137b16b7157
+5	289	7871807664173869	C:/Development/repeatlab/repeatlab_app/build/audioplayers_android_exo/intermediates/cxx/Debug/5w3w4f44/obj/x86_64/librubberband_jni.so	2b64e137b16b7157

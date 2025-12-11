@@ -30,6 +30,7 @@ apply plugin: 'de.mannodermaus.android-junit5'
 
 android {
     compileSdk 35
+    ndkVersion "25.2.9519653"
 
     // Conditional for compatibility with AGP <4.2.
     if (project.android.hasProperty('namespace')) {
@@ -50,8 +51,28 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 21  // Raised for NDK compatibility
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        
+        // NDK configuration for native Rubberband library
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+        }
+        
+        externalNativeBuild {
+            cmake {
+                cppFlags '-std=c++17 -O2'
+                arguments '-DANDROID_STL=c++_shared'
+            }
+        }
+    }
+    
+    // CMake build configuration for Rubberband JNI
+    externalNativeBuild {
+        cmake {
+            path file('src/main/cpp/CMakeLists.txt')
+            version '3.22.1'
+        }
     }
 
     lint {
