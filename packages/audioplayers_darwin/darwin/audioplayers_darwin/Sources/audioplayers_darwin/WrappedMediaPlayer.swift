@@ -207,7 +207,7 @@ class WrappedMediaPlayer {
       playerItem = AVPlayerItem(url: parsedUrl)
     }
 
-    playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithm.timeDomain
+    playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithm.spectral
     return playerItem
   }
 
