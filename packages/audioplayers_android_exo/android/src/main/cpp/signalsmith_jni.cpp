@@ -1,9 +1,8 @@
 /**
  * JNI Bridge for Signalsmith Stretch Library
- * Provides time-stretching functionality for Android audio processing
+ * Provides time-stretching functionality for Android audio processing.
  * 
- * This replaces the RubberBand implementation with Signalsmith Stretch,
- * providing a compatible API for the Kotlin layer.
+ * https://signalsmith-audio.co.uk/code/stretch/
  */
 
 #include <jni.h>

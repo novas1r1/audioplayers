@@ -12,8 +12,6 @@ import java.nio.ByteOrder
 /**
  * ExoPlayer AudioProcessor that uses the Signalsmith Stretch library for time-stretching.
  * This allows changing playback speed while preserving pitch.
- * 
- * This is a drop-in replacement for the previous RubberBand-based implementation.
  */
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 class SignalsmithAudioProcessor : BaseAudioProcessor() {

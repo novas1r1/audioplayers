@@ -4,8 +4,7 @@ package xyz.luan.audioplayers.player
  * JNI interface for the Signalsmith Stretch time-stretching library.
  * Provides native functions for real-time audio time-stretching while preserving pitch.
  * 
- * This is a drop-in replacement for the previous RubberBand-based implementation,
- * using Signalsmith Stretch (https://signalsmith-audio.co.uk/code/stretch/) instead.
+ * https://signalsmith-audio.co.uk/code/stretch/
  */
 object SignalsmithNative {
     

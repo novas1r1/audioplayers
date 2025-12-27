@@ -54,7 +54,7 @@ android {
         minSdkVersion 21  // Raised for NDK compatibility
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         
-        // NDK configuration for native Rubberband library
+        // NDK configuration for native Signalsmith library
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
         }
@@ -67,7 +67,7 @@ android {
         }
     }
     
-    // CMake build configuration for Rubberband JNI
+    // CMake build configuration for Signalsmith JNI
     externalNativeBuild {
         cmake {
             path file('src/main/cpp/CMakeLists.txt')
