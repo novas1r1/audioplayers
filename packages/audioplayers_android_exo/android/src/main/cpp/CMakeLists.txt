@@ -51,7 +51,8 @@ target_compile_options(signalsmith_jni PRIVATE
     -fdata-sections
 )
 
-# Linker flags to reduce size
+# Linker flags to reduce size and support 16KB page sizes (Android 15+)
 target_link_options(signalsmith_jni PRIVATE
     -Wl,--gc-sections
+    -Wl,-z,max-page-size=16384
 )
