@@ -1,0 +1,27 @@
+{
+  "buildFiles": [
+    "C:\\Development\\packages\\audioplayers\\packages\\audioplayers_android_exo\\android\\src\\main\\cpp\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Anwendungen\\AndroidSDK\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "C:\\Development\\packages\\audioplayers\\packages\\audioplayers_android_exo\\android\\.cxx\\Debug\\614s436t\\x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Anwendungen\\AndroidSDK\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "C:\\Development\\packages\\audioplayers\\packages\\audioplayers_android_exo\\android\\.cxx\\Debug\\614s436t\\x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "signalsmith_jni::@6890427a1f51a3e7e1df": {
+      "artifactName": "signalsmith_jni",
+      "abi": "x86_64",
+      "output": "C:\\Development\\repeatlab\\repeatlab_app\\build\\audioplayers_android_exo\\intermediates\\cxx\\Debug\\614s436t\\obj\\x86_64\\libsignalsmith_jni.so",
+      "runtimeFiles": []
+    }
+  }
+}

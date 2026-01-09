@@ -1,0 +1,7 @@
+[
+{
+  "directory": "C:/Development/packages/audioplayers/packages/audioplayers_android_exo/android/.cxx/Debug/614s436t/armeabi-v7a",
+  "command": "C:\\Anwendungen\\AndroidSDK\\ndk\\25.2.9519653\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=armv7-none-linux-androideabi21 --sysroot=C:/Anwendungen/AndroidSDK/ndk/25.2.9519653/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dsignalsmith_jni_EXPORTS -IC:/Development/packages/audioplayers/packages/audioplayers_android_exo/android/src/main/cpp -IC:/Development/packages/audioplayers/packages/audioplayers_android_exo/android/src/main/cpp/signalsmith-stretch -IC:/Development/packages/audioplayers/packages/audioplayers_android_exo/android/src/main/cpp/signalsmith-linear/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -march=armv7-a -mthumb -Wformat -Werror=format-security  -std=c++17 -O2 -fno-limit-debug-info  -fPIC -O2 -fvisibility=hidden -ffunction-sections -fdata-sections -std=c++11 -o CMakeFiles\\signalsmith_jni.dir\\signalsmith_jni.cpp.o -c C:\\Development\\packages\\audioplayers\\packages\\audioplayers_android_exo\\android\\src\\main\\cpp\\signalsmith_jni.cpp",
+  "file": "C:\\Development\\packages\\audioplayers\\packages\\audioplayers_android_exo\\android\\src\\main\\cpp\\signalsmith_jni.cpp"
+}
+]

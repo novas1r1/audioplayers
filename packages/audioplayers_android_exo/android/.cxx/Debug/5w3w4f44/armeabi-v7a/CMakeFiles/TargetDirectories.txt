@@ -1,0 +1,3 @@
+C:/Development/repeatlab/audioplayers/packages/audioplayers_android_exo/android/.cxx/Debug/5w3w4f44/armeabi-v7a/CMakeFiles/rubberband_jni.dir
+C:/Development/repeatlab/audioplayers/packages/audioplayers_android_exo/android/.cxx/Debug/5w3w4f44/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Development/repeatlab/audioplayers/packages/audioplayers_android_exo/android/.cxx/Debug/5w3w4f44/armeabi-v7a/CMakeFiles/rebuild_cache.dir
