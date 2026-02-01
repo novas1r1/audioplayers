@@ -39,6 +39,13 @@ class ExoPlayerWrapper(
         private const val TAG = "ExoPlayerWrapper"
     }
 
+    // Position tracking for Signalsmith mode
+    // When using Signalsmith, ExoPlayer runs at 1.0x but we need to report adjusted position
+    private var signalsmithSpeed: Float = 1.0f
+    private var lastSpeedChangePosition: Long = 0  // ExoPlayer position when speed changed
+    private var lastSpeedChangeContentPosition: Long = 0  // Actual content position when speed changed
+    private var lastSpeedChangeTime: Long = 0  // System time when speed changed
+
     class ExoPlayerListener(private val wrappedPlayer: WrappedPlayer) : androidx.media3.common.Player.Listener {
         override fun onPlayerError(error: PlaybackException) {
             if (error.errorCode == PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED) {
@@ -113,7 +120,21 @@ class ExoPlayerWrapper(
     }
 
     override fun getCurrentPosition(): Int {
-        return player.currentPosition.toInt()
+        val exoPosition = player.currentPosition
+
+        // When using Signalsmith, ExoPlayer runs at 1.0x but audio plays at signalsmithSpeed
+        // We need to calculate the actual content position
+        if (useSignalsmithForRate && signalsmithSpeed != 1.0f) {
+            // Calculate how much ExoPlayer has advanced since the last speed change
+            val exoAdvance = exoPosition - lastSpeedChangePosition
+            // The actual content has advanced at signalsmithSpeed rate
+            val contentAdvance = (exoAdvance * signalsmithSpeed).toLong()
+            // Return the adjusted content position
+            val adjustedPosition = lastSpeedChangeContentPosition + contentAdvance
+            return adjustedPosition.toInt()
+        }
+
+        return exoPosition.toInt()
     }
 
     override fun start() {
@@ -127,10 +148,20 @@ class ExoPlayerWrapper(
     override fun stop() {
         player.pause()
         player.seekTo(0)
+        // Reset position tracking
+        lastSpeedChangePosition = 0
+        lastSpeedChangeContentPosition = 0
     }
 
     override fun seekTo(position: Int) {
         player.seekTo(position.toLong())
+
+        // Reset position tracking after seek
+        // The seek position is the new content position
+        lastSpeedChangePosition = position.toLong()
+        lastSpeedChangeContentPosition = position.toLong()
+        lastSpeedChangeTime = System.currentTimeMillis()
+
         wrappedPlayer.onSeekComplete()
     }
 
@@ -155,16 +186,30 @@ class ExoPlayerWrapper(
     override fun setRate(rate: Float) {
         Log.i(TAG, "setRate called: rate=$rate, useSignalsmithForRate=$useSignalsmithForRate")
         if (useSignalsmithForRate) {
+            // Capture current position before changing speed for position tracking
+            val currentExoPosition = player.currentPosition
+            val currentContentPosition = getCurrentPosition().toLong()
+
             // Use Signalsmith for pitch-preserving time-stretching
             Log.i(TAG, "Using Signalsmith for rate change")
             signalsmithAudioProcessor.setSpeed(rate)
             // Keep ExoPlayer at 1.0x speed - Signalsmith handles the actual tempo change
             player.setPlaybackSpeed(1.0f)
+
+            // Update position tracking for adjusted position calculation
+            lastSpeedChangePosition = currentExoPosition
+            lastSpeedChangeContentPosition = currentContentPosition
+            lastSpeedChangeTime = System.currentTimeMillis()
+            signalsmithSpeed = rate
+
+            Log.i(TAG, "Position tracking updated: exoPos=$currentExoPosition, contentPos=$currentContentPosition, speed=$rate")
         } else {
             // Fallback to native speed control (changes pitch along with speed)
             Log.i(TAG, "Using native ExoPlayer speed control")
             signalsmithAudioProcessor.setSpeed(1.0f)
             player.setPlaybackSpeed(rate)
+            // Reset Signalsmith tracking
+            signalsmithSpeed = 1.0f
         }
     }
     
@@ -201,6 +246,11 @@ class ExoPlayerWrapper(
     @RequiresApi(Build.VERSION_CODES.M)
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override fun setSource(source: Source) {
+        // Reset position tracking for new source
+        lastSpeedChangePosition = 0
+        lastSpeedChangeContentPosition = 0
+        signalsmithSpeed = 1.0f
+
         if (source is UrlSource) {
             player.setMediaItem(MediaItem.fromUri(source.url))
         } else if (source is BytesSource) {
