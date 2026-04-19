@@ -188,7 +188,7 @@ enum ReleaseMode: String {
       playerItem = AVPlayerItem(url: parsedUrl)
     }
 
-    playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithm.spectral
+    playerItem.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithm.timeDomain
     return playerItem
   }
 
