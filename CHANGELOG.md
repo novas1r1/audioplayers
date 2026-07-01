@@ -3,6 +3,151 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-06-27
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`audioplayers` - `v6.8.1`](#audioplayers---v681)
+ - [`audioplayers_windows` - `v4.4.1`](#audioplayers_windows---v441)
+
+---
+
+#### `audioplayers` - `v6.8.1`
+
+ - **FIX**: Avoid throwing a StateError in AudioPlayer._completePrepared ([#2010](https://github.com/bluefireteam/audioplayers/issues/2010)). ([d8a4f395](https://github.com/bluefireteam/audioplayers/commit/d8a4f395b5710b566da205dfd15f68bb5d93d7a3))
+ - **FIX**(windows): Compatibility with Visual Studio 18 (2026) ([#2011](https://github.com/bluefireteam/audioplayers/issues/2011)). ([ae5f4b96](https://github.com/bluefireteam/audioplayers/commit/ae5f4b965ef886f08b903a7a9386bc283db458c5))\
+   Pay attention to the new [Windows platform requirements](https://github.com/bluefireteam/audioplayers/blob/main/packages/audioplayers_windows/README.md#requirements).
+
+#### `audioplayers_windows` - `v4.4.1`
+
+ - **FIX**(windows): Compatibility with Visual Studio 18 (2026) ([#2011](https://github.com/bluefireteam/audioplayers/issues/2011)). ([ae5f4b96](https://github.com/bluefireteam/audioplayers/commit/ae5f4b965ef886f08b903a7a9386bc283db458c5))\
+   Pay attention to the new [Windows platform requirements](https://github.com/bluefireteam/audioplayers/blob/main/packages/audioplayers_windows/README.md#requirements).
+
+
+## 2026-06-22
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`audioplayers` - `v6.8.0`](#audioplayers---v680)
+ - [`audioplayers_android` - `v5.3.0`](#audioplayers_android---v530)
+ - [`audioplayers_android_exo` - `v0.1.4`](#audioplayers_android_exo---v014)
+ - [`audioplayers_darwin` - `v6.5.0`](#audioplayers_darwin---v650)
+ - [`audioplayers_linux` - `v4.3.0`](#audioplayers_linux---v430)
+ - [`audioplayers_platform_interface` - `v7.2.0`](#audioplayers_platform_interface---v720)
+ - [`audioplayers_web` - `v5.3.0`](#audioplayers_web---v530)
+ - [`audioplayers_windows` - `v4.4.0`](#audioplayers_windows---v440)
+
+---
+
+#### `audioplayers` - `v6.8.0`
+
+ - **FIX**(windows): Update to C++23 & Windows Implementation Lib ([#2004](https://github.com/bluefireteam/audioplayers/issues/2004)). ([faa84312](https://github.com/bluefireteam/audioplayers/commit/faa843121c89625a5469dd517d39aae3a50cd1b8))
+ - **FEAT**(android): Compatibility with Built-In Kotlin ([#1991](https://github.com/bluefireteam/audioplayers/issues/1991)). ([687218b9](https://github.com/bluefireteam/audioplayers/commit/687218b96682a7bcadd9490572db692dbc9a2f07))
+
+#### `audioplayers_android` - `v5.3.0`
+
+ - **FEAT**(android): Compatibility with Built-In Kotlin ([#1991](https://github.com/bluefireteam/audioplayers/issues/1991)). ([687218b9](https://github.com/bluefireteam/audioplayers/commit/687218b96682a7bcadd9490572db692dbc9a2f07))
+
+#### `audioplayers_android_exo` - `v0.1.4`
+
+ - **FEAT**(android): Compatibility with Built-In Kotlin ([#1991](https://github.com/bluefireteam/audioplayers/issues/1991)). ([687218b9](https://github.com/bluefireteam/audioplayers/commit/687218b96682a7bcadd9490572db692dbc9a2f07))
+
+#### `audioplayers_darwin` - `v6.5.0`
+
+ - **FEAT**(android): Compatibility with Built-In Kotlin ([#1991](https://github.com/bluefireteam/audioplayers/issues/1991)). ([687218b9](https://github.com/bluefireteam/audioplayers/commit/687218b96682a7bcadd9490572db692dbc9a2f07))
+
+#### `audioplayers_linux` - `v4.3.0`
+
+ - **FEAT**(android): Compatibility with Built-In Kotlin ([#1991](https://github.com/bluefireteam/audioplayers/issues/1991)). ([687218b9](https://github.com/bluefireteam/audioplayers/commit/687218b96682a7bcadd9490572db692dbc9a2f07))
+
+#### `audioplayers_platform_interface` - `v7.2.0`
+
+ - **FEAT**(android): Compatibility with Built-In Kotlin ([#1991](https://github.com/bluefireteam/audioplayers/issues/1991)). ([687218b9](https://github.com/bluefireteam/audioplayers/commit/687218b96682a7bcadd9490572db692dbc9a2f07))
+
+#### `audioplayers_web` - `v5.3.0`
+
+ - **FEAT**(android): Compatibility with Built-In Kotlin ([#1991](https://github.com/bluefireteam/audioplayers/issues/1991)). ([687218b9](https://github.com/bluefireteam/audioplayers/commit/687218b96682a7bcadd9490572db692dbc9a2f07))
+
+#### `audioplayers_windows` - `v4.4.0`
+
+ - **FIX**(windows): Update to C++23 & Windows Implementation Lib ([#2004](https://github.com/bluefireteam/audioplayers/issues/2004)). ([faa84312](https://github.com/bluefireteam/audioplayers/commit/faa843121c89625a5469dd517d39aae3a50cd1b8))
+ - **FEAT**(android): Compatibility with Built-In Kotlin ([#1991](https://github.com/bluefireteam/audioplayers/issues/1991)). ([687218b9](https://github.com/bluefireteam/audioplayers/commit/687218b96682a7bcadd9490572db692dbc9a2f07))
+
+
+## 2026-06-04
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`audioplayers` - `v6.7.1`](#audioplayers---v671)
+
+---
+
+#### `audioplayers` - `v6.7.1`
+
+ - **FIX**(web): Exclude web from rechecking cache ([#1993](https://github.com/bluefireteam/audioplayers/issues/1993)). ([7c8da3d5](https://github.com/bluefireteam/audioplayers/commit/7c8da3d595ef9d6adbc0e1b8a753c7ba548451d6))
+
+
+## 2026-05-28
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`audioplayers` - `v6.7.0`](#audioplayers---v670)
+ - [`audioplayers_android_exo` - `v0.1.3+1`](#audioplayers_android_exo---v0131)
+ - [`audioplayers_web` - `v5.2.1`](#audioplayers_web---v521)
+ - [`audioplayers_windows` - `v4.3.1`](#audioplayers_windows---v431)
+
+---
+
+#### `audioplayers` - `v6.7.0`
+
+ - **FIX**: Always check if file exists when playing from cache ([#1980](https://github.com/bluefireteam/audioplayers/issues/1980)). ([a1a5f4e6](https://github.com/bluefireteam/audioplayers/commit/a1a5f4e65c8e58f50330333d2e4f43faeca4ffe9))
+ - **FEAT**: Get duration from AudioPool ([#1954](https://github.com/bluefireteam/audioplayers/issues/1954)). ([c042e20e](https://github.com/bluefireteam/audioplayers/commit/c042e20e70df090d2c452c8a3cc32964498de7eb))
+
+#### `audioplayers_android_exo` - `v0.1.3+1`
+
+ - **FIX**(audioplayers_android_exo): apply setVolume to mono audio sources ([#1987](https://github.com/bluefireteam/audioplayers/issues/1987)). ([c3f8fab0](https://github.com/bluefireteam/audioplayers/commit/c3f8fab0d9e6c7d72fe477accda31daecd5f60c6))
+
+#### `audioplayers_web` - `v5.2.1`
+
+ - **FIX**(web): Use GainNode for volume control to fix Safari compatibility ([#1978](https://github.com/bluefireteam/audioplayers/issues/1978)). ([a3d7e3f8](https://github.com/bluefireteam/audioplayers/commit/a3d7e3f8ab1d2bdab854a9650b6d77207e4324dc))
+
+#### `audioplayers_windows` - `v4.3.1`
+
+ - **FIX**(windows): Refactor static globals to instance members ([#1970](https://github.com/bluefireteam/audioplayers/issues/1970)). ([992d5074](https://github.com/bluefireteam/audioplayers/commit/992d50748e6d32a0a292d4f32d0905b7eca02ad1))
+
+
 ## 2026-03-01
 
 ### Changes

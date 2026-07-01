@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 set(PROJECT_NAME "audioplayers_windows")
-set(WIL_VERSION "1.0.210803.1")
+cmake_policy(VERSION 3.15...3.24)
+set(WIL_VERSION "1.0.260126.7")
 project(${PROJECT_NAME} LANGUAGES CXX)
 include(FetchContent)
 
@@ -44,6 +45,7 @@ add_library(${PLUGIN_NAME} SHARED
 apply_standard_settings(${PLUGIN_NAME})
 set_target_properties(${PLUGIN_NAME} PROPERTIES
   CXX_VISIBILITY_PRESET hidden)
+target_compile_features(${PLUGIN_NAME} PRIVATE cxx_std_20)
 
 target_link_libraries(${PLUGIN_NAME} PRIVATE ${CMAKE_BINARY_DIR}/packages/Microsoft.Windows.ImplementationLibrary/build/native/Microsoft.Windows.ImplementationLibrary.targets)
 target_link_libraries(${PLUGIN_NAME} PRIVATE Mfplat windowsapp)

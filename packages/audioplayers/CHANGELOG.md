@@ -1,3 +1,23 @@
+## 6.8.1
+
+ - **FIX**: Avoid throwing a StateError in AudioPlayer._completePrepared ([#2010](https://github.com/bluefireteam/audioplayers/issues/2010)). ([d8a4f395](https://github.com/bluefireteam/audioplayers/commit/d8a4f395b5710b566da205dfd15f68bb5d93d7a3))
+ - **FIX**(windows): Compatibility with Visual Studio 18 (2026) ([#2011](https://github.com/bluefireteam/audioplayers/issues/2011)). ([ae5f4b96](https://github.com/bluefireteam/audioplayers/commit/ae5f4b965ef886f08b903a7a9386bc283db458c5))\
+   Pay attention to the new [Windows platform requirements](https://github.com/bluefireteam/audioplayers/blob/main/packages/audioplayers_windows/README.md#requirements).
+
+## 6.8.0
+
+ - **FIX**(windows): Update to C++23 & Windows Implementation Lib ([#2004](https://github.com/bluefireteam/audioplayers/issues/2004)). ([faa84312](https://github.com/bluefireteam/audioplayers/commit/faa843121c89625a5469dd517d39aae3a50cd1b8))
+ - **FEAT**(android): Compatibility with Built-In Kotlin ([#1991](https://github.com/bluefireteam/audioplayers/issues/1991)). ([687218b9](https://github.com/bluefireteam/audioplayers/commit/687218b96682a7bcadd9490572db692dbc9a2f07))
+
+## 6.7.1
+
+ - **FIX**(web): Exclude web from rechecking cache ([#1993](https://github.com/bluefireteam/audioplayers/issues/1993)). ([7c8da3d5](https://github.com/bluefireteam/audioplayers/commit/7c8da3d595ef9d6adbc0e1b8a753c7ba548451d6))
+
+## 6.7.0
+
+ - **FIX**: Always check if file exists when playing from cache ([#1980](https://github.com/bluefireteam/audioplayers/issues/1980)). ([a1a5f4e6](https://github.com/bluefireteam/audioplayers/commit/a1a5f4e65c8e58f50330333d2e4f43faeca4ffe9))
+ - **FEAT**: Get duration from AudioPool ([#1954](https://github.com/bluefireteam/audioplayers/issues/1954)). ([c042e20e](https://github.com/bluefireteam/audioplayers/commit/c042e20e70df090d2c452c8a3cc32964498de7eb))
+
 ## 6.6.0
 
  - **PERF**: Option to set PlayerMode for AudioPools ([#1963](https://github.com/bluefireteam/audioplayers/issues/1963)). ([a97caa12](https://github.com/bluefireteam/audioplayers/commit/a97caa12a8fbdbc75ea246d8683c57f406266369))
