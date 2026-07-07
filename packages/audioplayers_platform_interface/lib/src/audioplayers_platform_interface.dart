@@ -25,6 +25,13 @@ abstract class AudioplayersPlatformInterface extends PlatformInterface
 
   static final Object _token = Object();
 
+  /// Default implementation so platform packages that don't support pitch
+  /// shifting (web, darwin, windows, linux) keep working without changes.
+  @override
+  Future<void> setPitchShift(String playerId, double pitchShift) {
+    throw UnsupportedError('setPitchShift is not supported on this platform');
+  }
+
   /// The default instance of [AudioplayersPlatformInterface] to use.
   ///
   /// Defaults to [AudioplayersPlatform].
@@ -87,6 +94,15 @@ abstract class MethodChannelAudioplayersPlatformInterface {
   /// iOS and macOS have limits between 0.5 and 2x
   /// Android SDK version should be 23 or higher
   Future<void> setPlaybackRate(String playerId, double playbackRate);
+
+  /// Sets the pitch shift as a frequency multiplier, independent of the
+  /// playback rate (1.0 = unchanged, 2.0 = one octave up, 0.5 = one octave
+  /// down).
+  ///
+  /// Only supported on Android (via the Signalsmith processor in the
+  /// audioplayers_android_exo implementation); other platforms throw
+  /// [UnsupportedError].
+  Future<void> setPitchShift(String playerId, double pitchShift);
 
   /// Configures the player to read the audio from a URL.
   ///

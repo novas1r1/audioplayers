@@ -228,6 +228,18 @@ class ExoPlayerWrapper(
     }
     
     /**
+     * Set an independent pitch shift, applied via the Signalsmith processor.
+     * Time-neutral: does not affect playback speed or position tracking.
+     * Note: only takes effect while the Signalsmith processor is enabled
+     * (i.e. setPreservePitch(false) would also disable pitch shifting).
+     */
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    override fun setPitchShift(pitchShift: Float) {
+        Log.i(TAG, "setPitchShift called: $pitchShift")
+        signalsmithAudioProcessor.setPitchScale(pitchShift.toDouble())
+    }
+
+    /**
      * Enable or disable Signalsmith time-stretching for rate changes.
      * When enabled (default), playback rate changes preserve pitch.
      * When disabled, native ExoPlayer speed control is used (pitch changes with speed).

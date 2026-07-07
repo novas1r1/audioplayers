@@ -70,6 +70,16 @@ class WrappedPlayer internal constructor(
             }
         }
 
+    var pitchShift = 1.0f
+        set(value) {
+            if (field != value) {
+                field = value
+                if (!released) {
+                    player?.setPitchShift(value)
+                }
+            }
+        }
+
     var releaseMode = ReleaseMode.RELEASE
         set(value) {
             if (field != value) {
@@ -282,6 +292,7 @@ class WrappedPlayer internal constructor(
     private fun PlayerWrapper.configAndPrepare() {
         setVolumeAndBalance(volume, balance)
         setLooping(isLooping)
+        setPitchShift(pitchShift)
         prepare()
     }
 

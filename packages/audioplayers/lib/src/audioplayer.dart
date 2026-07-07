@@ -50,6 +50,10 @@ class AudioPlayer {
 
   double get playbackRate => _playbackRate;
 
+  double _pitchShift = 1.0;
+
+  double get pitchShift => _pitchShift;
+
   /// Current mode of the audio player. Can be updated at any time, but is going
   /// to take effect only at the next time you play the audio.
   PlayerMode _mode = PlayerMode.mediaPlayer;
@@ -341,6 +345,17 @@ class AudioPlayer {
     _playbackRate = playbackRate;
     await creatingCompleter.future;
     return _platform.setPlaybackRate(playerId, playbackRate);
+  }
+
+  /// Sets the pitch shift as a frequency multiplier, independent of the
+  /// playback rate (1.0 = unchanged, 2.0 = one octave up).
+  ///
+  /// Only supported on Android in this fork (Signalsmith processor); other
+  /// platforms throw [UnsupportedError].
+  Future<void> setPitchShift(double pitchShift) async {
+    _pitchShift = pitchShift;
+    await creatingCompleter.future;
+    return _platform.setPitchShift(playerId, pitchShift);
   }
 
   /// Sets the audio source for this player.

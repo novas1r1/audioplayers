@@ -149,6 +149,11 @@ class AudioplayersPlugin : FlutterPlugin {
                     player.rate = rate.toFloat()
                 }
 
+                "setPitchShift" -> {
+                    val pitchShift = call.argument<Double>("pitchShift") ?: error("pitchShift is required")
+                    player.pitchShift = pitchShift.toFloat()
+                }
+
                 "getDuration" -> {
                     response.success(player.getDuration())
                     return

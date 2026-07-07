@@ -125,6 +125,15 @@ mixin MethodChannelAudioplayersPlatform
   }
 
   @override
+  Future<void> setPitchShift(String playerId, double pitchShift) {
+    return _call(
+      'setPitchShift',
+      playerId,
+      <String, dynamic>{'pitchShift': pitchShift},
+    );
+  }
+
+  @override
   Future<void> setReleaseMode(String playerId, ReleaseMode releaseMode) {
     return _call(
       'setReleaseMode',

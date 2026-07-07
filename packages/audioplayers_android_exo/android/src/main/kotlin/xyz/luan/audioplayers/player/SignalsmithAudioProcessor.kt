@@ -23,6 +23,7 @@ class SignalsmithAudioProcessor : BaseAudioProcessor() {
     
     private var handle: Long = 0
     private var speed: Float = 1.0f
+    private var pitchScale: Double = 1.0
     private var enabled: Boolean = true
     
     // Buffers for audio processing
@@ -68,6 +69,20 @@ class SignalsmithAudioProcessor : BaseAudioProcessor() {
     }
     
     /**
+     * Set the pitch shift.
+     * @param scale Frequency multiplier: 1.0 = normal, 2.0 = octave up, 0.5 = octave down
+     */
+    fun setPitchScale(scale: Double) {
+        this.pitchScale = scale.coerceIn(0.25, 4.0)
+
+        Log.i(TAG, "setPitchScale called: ${this.pitchScale}, handle=$handle, enabled=$enabled")
+
+        if (handle != 0L && enabled) {
+            SignalsmithNative.setPitchScale(handle, this.pitchScale)
+        }
+    }
+
+    /**
      * Enable or disable the Signalsmith processing.
      * When disabled, audio passes through unchanged.
      */
@@ -75,13 +90,13 @@ class SignalsmithAudioProcessor : BaseAudioProcessor() {
         this.enabled = enabled
         Log.d(TAG, "Signalsmith processing ${if (enabled) "enabled" else "disabled"}")
     }
-    
+
     /**
      * Check if Signalsmith processing is active.
-     * Returns true if enabled and speed != 1.0
+     * Returns true if enabled and speed != 1.0 or pitch is shifted
      */
     fun isSignalsmithActive(): Boolean {
-        return enabled && handle != 0L && speed != 1.0f
+        return enabled && handle != 0L && (speed != 1.0f || pitchScale != 1.0)
     }
     
     @Throws(UnhandledAudioFormatException::class)
@@ -115,10 +130,11 @@ class SignalsmithAudioProcessor : BaseAudioProcessor() {
                 inputShortBuffer = ShortArray(bufferSamples)
                 outputShortBuffer = ShortArray(bufferSamples * 4)
                 
-                // Apply current speed setting
+                // Apply current speed and pitch settings
                 val timeRatio = 1.0 / speed
                 SignalsmithNative.setTimeRatio(handle, timeRatio)
-                
+                SignalsmithNative.setPitchScale(handle, pitchScale)
+
                 Log.d(TAG, "Configured: sampleRate=${inputAudioFormat.sampleRate}, " +
                         "channels=${inputAudioFormat.channelCount}, speed=$speed")
             } else {
@@ -239,6 +255,9 @@ class SignalsmithAudioProcessor : BaseAudioProcessor() {
         super.onFlush()
         if (handle != 0L) {
             SignalsmithNative.reset(handle)
+            // Reapply settings in case the native reset cleared them
+            SignalsmithNative.setTimeRatio(handle, 1.0 / speed)
+            SignalsmithNative.setPitchScale(handle, pitchScale)
             Log.d(TAG, "Flushed Signalsmith state")
         }
     }
