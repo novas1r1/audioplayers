@@ -83,7 +83,10 @@ class ExoPlayerWrapper(
     
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private var signalsmithAudioProcessor = SignalsmithAudioProcessor()
-    
+
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    private var clickTrackAudioProcessor = ClickTrackAudioProcessor()
+
     private lateinit var audioSink: AudioSink
     
     // Track whether Signalsmith is available and should be used for rate changes
@@ -101,9 +104,15 @@ class ExoPlayerWrapper(
                 enableFloatOutput: Boolean,
                 enableAudioTrackPlaybackParams: Boolean,
             ): AudioSink {
-                // Signalsmith processor comes first for time-stretching, then channel mixing for balance
+                // Click track first: its frames are pure media time (ExoPlayer
+                // runs at 1.0x, all speed change happens in Signalsmith after
+                // it), so metronome clicks are placed sample-exactly and
+                // independent of playback speed. Then Signalsmith for
+                // time-stretching, then channel mixing for balance.
                 audioSink = DefaultAudioSink.Builder(appContext)
-                    .setAudioProcessors(arrayOf(signalsmithAudioProcessor, channelMixingAudioProcessor))
+                    .setAudioProcessors(
+                        arrayOf(clickTrackAudioProcessor, signalsmithAudioProcessor, channelMixingAudioProcessor),
+                    )
                     .build()
                 return audioSink
             }
@@ -149,6 +158,9 @@ class ExoPlayerWrapper(
 
     override fun stop() {
         player.pause()
+        // Anchor before the seek: the sink flush it triggers arrives later
+        // on the playback thread and adopts this position.
+        clickTrackAudioProcessor.setPendingAnchor(0)
         player.seekTo(0)
         // Reset position tracking
         lastSpeedChangePosition = 0
@@ -156,6 +168,8 @@ class ExoPlayerWrapper(
     }
 
     override fun seekTo(position: Int) {
+        // Anchor the click grid before the seek (see stop()).
+        clickTrackAudioProcessor.setPendingAnchor(position.toLong())
         player.seekTo(position.toLong())
 
         // Reset position tracking after seek
@@ -240,6 +254,16 @@ class ExoPlayerWrapper(
     }
 
     /**
+     * Configure (or clear) the in-pipeline metronome click track. Applied
+     * atomically; takes effect within one audio buffer, no flush needed.
+     */
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    override fun setClickTrack(config: ClickTrackConfig?) {
+        Log.i(TAG, "setClickTrack called: $config")
+        clickTrackAudioProcessor.setConfig(config)
+    }
+
+    /**
      * Enable or disable Signalsmith time-stretching for rate changes.
      * When enabled (default), playback rate changes preserve pitch.
      * When disabled, native ExoPlayer speed control is used (pitch changes with speed).
@@ -273,6 +297,8 @@ class ExoPlayerWrapper(
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override fun setSource(source: Source) {
         player.clearMediaItems()
+        // A new item starts at media position 0 — re-anchor the click grid.
+        clickTrackAudioProcessor.setPendingAnchor(0)
         // Reset position tracking for new source
         lastSpeedChangePosition = 0
         lastSpeedChangeContentPosition = 0

@@ -358,6 +358,36 @@ class AudioPlayer {
     return _platform.setPitchShift(playerId, pitchShift);
   }
 
+  /// Configures the in-pipeline metronome click track: clicks synthesized
+  /// inside the playback pipeline on the media-time beat grid
+  /// `anchorMs + offsetMs + n * beatPeriod(bpm)`, sample-locked to the
+  /// music across seeks, loops and speed changes. Pass `enabled: false` to
+  /// turn the clicks off.
+  ///
+  /// Only supported on Android in this fork (ClickTrackAudioProcessor in
+  /// audioplayers_android_exo); other platforms throw [UnsupportedError].
+  Future<void> setClickTrack({
+    required bool enabled,
+    int? bpm,
+    int? anchorMs,
+    int offsetMs = 0,
+    int beatsPerBar = 4,
+    int pulsesPerBeat = 1,
+    double volume = 1.0,
+  }) async {
+    await creatingCompleter.future;
+    return _platform.setClickTrack(
+      playerId,
+      enabled: enabled,
+      bpm: bpm,
+      anchorMs: anchorMs,
+      offsetMs: offsetMs,
+      beatsPerBar: beatsPerBar,
+      pulsesPerBeat: pulsesPerBeat,
+      volume: volume,
+    );
+  }
+
   /// Sets the audio source for this player.
   ///
   /// This will delegate to one of the specific methods below depending on

@@ -92,6 +92,39 @@ void main() {
       expect(call.args, {'playerId': 'p1'});
       expect(position, 0);
     });
+
+    test('#setClickTrack', () async {
+      await platform.setClickTrack(
+        'p1',
+        enabled: true,
+        bpm: 120,
+        anchorMs: 130,
+        offsetMs: 25,
+        beatsPerBar: 3,
+        pulsesPerBeat: 2,
+        volume: 0.6,
+      );
+      final call = popLastCall();
+      expect(call.method, 'setClickTrack');
+      expect(call.args, {
+        'playerId': 'p1',
+        'enabled': true,
+        'bpm': 120,
+        'anchorMs': 130,
+        'offsetMs': 25,
+        'beatsPerBar': 3,
+        'pulsesPerBeat': 2,
+        'volume': 0.6,
+      });
+    });
+
+    test('#setClickTrack disabled needs no bpm', () async {
+      await platform.setClickTrack('p1', enabled: false);
+      final call = popLastCall();
+      expect(call.method, 'setClickTrack');
+      expect(call.args['enabled'], false);
+      expect(call.args['bpm'], null);
+    });
   });
 
   group('AudioPlayers Event Channel', () {

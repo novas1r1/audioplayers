@@ -15,6 +15,7 @@ interface PlayerWrapper {
     fun setVolume(leftVolume: Float, rightVolume: Float)
     fun setRate(rate: Float)
     fun setPitchShift(pitchShift: Float)
+    fun setClickTrack(config: ClickTrackConfig?)
     fun setLooping(looping: Boolean)
     fun updateContext(context: AudioContextAndroid)
     fun setSource(source: Source)

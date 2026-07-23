@@ -134,6 +134,32 @@ mixin MethodChannelAudioplayersPlatform
   }
 
   @override
+  Future<void> setClickTrack(
+    String playerId, {
+    required bool enabled,
+    int? bpm,
+    int? anchorMs,
+    int offsetMs = 0,
+    int beatsPerBar = 4,
+    int pulsesPerBeat = 1,
+    double volume = 1.0,
+  }) {
+    return _call(
+      'setClickTrack',
+      playerId,
+      <String, dynamic>{
+        'enabled': enabled,
+        'bpm': bpm,
+        'anchorMs': anchorMs,
+        'offsetMs': offsetMs,
+        'beatsPerBar': beatsPerBar,
+        'pulsesPerBeat': pulsesPerBeat,
+        'volume': volume,
+      },
+    );
+  }
+
+  @override
   Future<void> setReleaseMode(String playerId, ReleaseMode releaseMode) {
     return _call(
       'setReleaseMode',

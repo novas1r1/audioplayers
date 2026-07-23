@@ -9,6 +9,7 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import xyz.luan.audioplayers.player.ClickTrackConfig
 import xyz.luan.audioplayers.player.WrappedPlayer
 import xyz.luan.audioplayers.source.BytesSource
 import xyz.luan.audioplayers.source.UrlSource
@@ -152,6 +153,23 @@ class AudioplayersPlugin : FlutterPlugin {
                 "setPitchShift" -> {
                     val pitchShift = call.argument<Double>("pitchShift") ?: error("pitchShift is required")
                     player.pitchShift = pitchShift.toFloat()
+                }
+
+                "setClickTrack" -> {
+                    val enabled = call.argument<Boolean>("enabled") ?: false
+                    player.clickTrack = if (!enabled) {
+                        null
+                    } else {
+                        ClickTrackConfig(
+                            enabled = true,
+                            bpm = call.argument<Int>("bpm") ?: error("bpm is required"),
+                            anchorMs = call.argument<Number>("anchorMs")?.toLong(),
+                            offsetMs = call.argument<Number>("offsetMs")?.toLong() ?: 0L,
+                            beatsPerBar = call.argument<Int>("beatsPerBar") ?: 4,
+                            pulsesPerBeat = call.argument<Int>("pulsesPerBeat") ?: 1,
+                            volume = (call.argument<Double>("volume") ?: 1.0).toFloat(),
+                        )
+                    }
                 }
 
                 "getDuration" -> {

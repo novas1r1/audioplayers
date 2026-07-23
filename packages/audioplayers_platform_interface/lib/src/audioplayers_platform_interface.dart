@@ -32,6 +32,22 @@ abstract class AudioplayersPlatformInterface extends PlatformInterface
     throw UnsupportedError('setPitchShift is not supported on this platform');
   }
 
+  /// Default implementation so platform packages that don't support the
+  /// in-pipeline metronome click track keep working without changes.
+  @override
+  Future<void> setClickTrack(
+    String playerId, {
+    required bool enabled,
+    int? bpm,
+    int? anchorMs,
+    int offsetMs = 0,
+    int beatsPerBar = 4,
+    int pulsesPerBeat = 1,
+    double volume = 1.0,
+  }) {
+    throw UnsupportedError('setClickTrack is not supported on this platform');
+  }
+
   /// The default instance of [AudioplayersPlatformInterface] to use.
   ///
   /// Defaults to [AudioplayersPlatform].
@@ -103,6 +119,27 @@ abstract class MethodChannelAudioplayersPlatformInterface {
   /// audioplayers_android_exo implementation); other platforms throw
   /// [UnsupportedError].
   Future<void> setPitchShift(String playerId, double pitchShift);
+
+  /// Configures the in-pipeline metronome click track: clicks synthesized
+  /// inside the playback pipeline on the media-time beat grid
+  /// `anchorMs + offsetMs + n * beatPeriod(bpm)`. Clicks stay sample-locked
+  /// to the music across seeks, loops and speed changes.
+  ///
+  /// Pass `enabled: false` to turn the clicks off ([bpm] may be omitted
+  /// then). [volume] is the click gain 0.0..1.0 relative to the song.
+  ///
+  /// Only supported on Android (audioplayers_android_exo); other platforms
+  /// throw [UnsupportedError].
+  Future<void> setClickTrack(
+    String playerId, {
+    required bool enabled,
+    int? bpm,
+    int? anchorMs,
+    int offsetMs,
+    int beatsPerBar,
+    int pulsesPerBeat,
+    double volume,
+  });
 
   /// Configures the player to read the audio from a URL.
   ///

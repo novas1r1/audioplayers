@@ -80,6 +80,16 @@ class WrappedPlayer internal constructor(
             }
         }
 
+    var clickTrack: ClickTrackConfig? = null
+        set(value) {
+            if (field != value) {
+                field = value
+                if (!released) {
+                    player?.setClickTrack(value)
+                }
+            }
+        }
+
     var releaseMode = ReleaseMode.RELEASE
         set(value) {
             if (field != value) {
@@ -293,6 +303,7 @@ class WrappedPlayer internal constructor(
         setVolumeAndBalance(volume, balance)
         setLooping(isLooping)
         setPitchShift(pitchShift)
+        setClickTrack(clickTrack)
         prepare()
     }
 
