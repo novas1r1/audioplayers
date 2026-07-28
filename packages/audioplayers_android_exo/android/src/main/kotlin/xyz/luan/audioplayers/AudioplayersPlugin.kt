@@ -10,6 +10,7 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import xyz.luan.audioplayers.player.ClickTrackConfig
+import xyz.luan.audioplayers.player.LoopRegion
 import xyz.luan.audioplayers.player.WrappedPlayer
 import xyz.luan.audioplayers.source.BytesSource
 import xyz.luan.audioplayers.source.UrlSource
@@ -172,6 +173,18 @@ class AudioplayersPlugin : FlutterPlugin {
                     }
                 }
 
+                "setLoopRegion" -> {
+                    val enabled = call.argument<Boolean>("enabled") ?: false
+                    player.loopRegion = if (!enabled) {
+                        null
+                    } else {
+                        val startMs = call.argument<Int>("startMs") ?: error("startMs is required")
+                        val endMs = call.argument<Int>("endMs") ?: error("endMs is required")
+                        require(endMs > startMs) { "endMs must be greater than startMs" }
+                        LoopRegion(startMs = startMs, endMs = endMs)
+                    }
+                }
+
                 "getDuration" -> {
                     response.success(player.getDuration())
                     return
@@ -275,6 +288,15 @@ class AudioplayersPlugin : FlutterPlugin {
 
     fun handleSeekComplete(player: WrappedPlayer) {
         player.eventHandler.success("audio.onSeekComplete")
+    }
+
+    /**
+     * Reports a native loop-region wrap. Deliberately NOT "audio.onSeekComplete":
+     * the Dart AudioPlayer.seek() awaits that event, and a native wrap must
+     * never satisfy a pending user seek's completion future.
+     */
+    fun handleLoopWrap(player: WrappedPlayer, positionMs: Int) {
+        player.eventHandler.success("audio.onLoopWrap", hashMapOf("value" to positionMs))
     }
 }
 

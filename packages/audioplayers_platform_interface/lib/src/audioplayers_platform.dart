@@ -160,6 +160,24 @@ mixin MethodChannelAudioplayersPlatform
   }
 
   @override
+  Future<void> setLoopRegion(
+    String playerId, {
+    required bool enabled,
+    int? startMs,
+    int? endMs,
+  }) {
+    return _call(
+      'setLoopRegion',
+      playerId,
+      <String, dynamic>{
+        'enabled': enabled,
+        'startMs': startMs,
+        'endMs': endMs,
+      },
+    );
+  }
+
+  @override
   Future<void> setReleaseMode(String playerId, ReleaseMode releaseMode) {
     return _call(
       'setReleaseMode',
@@ -292,6 +310,14 @@ mixin EventChannelAudioplayersPlatform
             return const AudioEvent(eventType: AudioEventType.complete);
           case 'audio.onSeekComplete':
             return const AudioEvent(eventType: AudioEventType.seekComplete);
+          case 'audio.onLoopWrap':
+            final millis = map.getInt('value');
+            return AudioEvent(
+              eventType: AudioEventType.loopWrap,
+              loopWrapPosition: millis != null
+                  ? Duration(milliseconds: millis)
+                  : Duration.zero,
+            );
           case 'audio.onPrepared':
             final isPrepared = map.getBool('value');
             return AudioEvent(

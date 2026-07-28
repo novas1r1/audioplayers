@@ -20,6 +20,7 @@ import androidx.media3.datasource.ByteArrayDataSource
 import androidx.media3.datasource.DataSource
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.PlayerMessage
 import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.source.MediaSource
@@ -91,6 +92,14 @@ class ExoPlayerWrapper(
     
     // Track whether Signalsmith is available and should be used for rate changes
     private var useSignalsmithForRate = true
+
+    // Native gapless loop region (RL-73): a PlayerMessage scheduled at the
+    // loop-end position wraps the playhead back to the loop start on the
+    // engine side, removing the Dart detection + platform-channel latency.
+    private var loopRegion: LoopRegion? = null
+
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    private var loopMessage: PlayerMessage? = null
 
     init {
         player = createPlayer(appContext)
@@ -165,23 +174,43 @@ class ExoPlayerWrapper(
         // Reset position tracking
         lastSpeedChangePosition = 0
         lastSpeedChangeContentPosition = 0
+        rescheduleLoopMessage()
     }
 
     override fun seekTo(position: Int) {
-        // Anchor the click grid before the seek (see stop()).
-        clickTrackAudioProcessor.setPendingAnchor(position.toLong())
-        player.seekTo(position.toLong())
-
-        // Reset position tracking after seek
-        // The seek position is the new content position
-        lastSpeedChangePosition = position.toLong()
-        lastSpeedChangeContentPosition = position.toLong()
-        lastSpeedChangeTime = System.currentTimeMillis()
-
+        performSeek(position.toLong())
         wrappedPlayer.onSeekComplete()
     }
 
+    /**
+     * Shared seek path for user seeks and native loop wraps. Anchors the
+     * click grid before the seek (the sink flush it triggers arrives later on
+     * the playback thread and adopts this position), resets the Signalsmith
+     * position-tracking anchors, and reschedules the loop-wrap message whose
+     * exo-space position depends on those anchors. Deliberately does NOT
+     * notify seek completion — callers decide which event the seek surfaces
+     * as (seekComplete vs loopWrap).
+     */
+    private fun performSeek(positionMs: Long) {
+        clickTrackAudioProcessor.setPendingAnchor(positionMs)
+        player.seekTo(positionMs)
+
+        // The seek position is the new content position
+        lastSpeedChangePosition = positionMs
+        lastSpeedChangeContentPosition = positionMs
+        lastSpeedChangeTime = System.currentTimeMillis()
+
+        rescheduleLoopMessage()
+    }
+
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override fun release() {
+        loopMessage?.cancel()
+        loopMessage = null
+        // Drop the region too: WrappedPlayer re-applies it via
+        // configAndPrepare on the next source, so keeping it here would only
+        // let setSource() schedule a stale message against the old bounds.
+        loopRegion = null
         player.stop()
         player.clearMediaItems()
     }
@@ -239,6 +268,8 @@ class ExoPlayerWrapper(
             // Reset Signalsmith tracking
             signalsmithSpeed = 1.0f
         }
+        // The anchors (and thus the exo-space loop-end position) changed.
+        rescheduleLoopMessage()
     }
     
     /**
@@ -261,6 +292,65 @@ class ExoPlayerWrapper(
     override fun setClickTrack(config: ClickTrackConfig?) {
         Log.i(TAG, "setClickTrack called: $config")
         clickTrackAudioProcessor.setConfig(config)
+    }
+
+    /**
+     * Sets (or clears) the native gapless loop region.
+     *
+     * A media3 [PlayerMessage] is scheduled at the loop-end position and its
+     * handler seeks back to the loop start through the same path as a user
+     * seek — so the click grid re-anchors via the pending-anchor protocol and
+     * the Signalsmith position tracking resets, exactly as the metronome
+     * design requires (the RL-54 decision: `REPEAT_MODE_ONE`/
+     * `ClippingMediaSource` would bypass both).
+     */
+    override fun setLoopRegion(region: LoopRegion?) {
+        Log.i(TAG, "setLoopRegion called: $region")
+        loopRegion = region
+        rescheduleLoopMessage()
+    }
+
+    /**
+     * (Re)schedules the loop-wrap [PlayerMessage].
+     *
+     * The message position must be expressed in ExoPlayer's position space,
+     * not media time: with Signalsmith active, ExoPlayer runs at 1.0x while
+     * the audio is stretched, so its internal position advances at playout
+     * rate and [getCurrentPosition] synthesizes the media position from the
+     * `lastSpeedChange*` anchors. This inverts that mapping for the loop end.
+     * Consequently the message must be rescheduled whenever the anchors move:
+     * every seek (including each wrap), rate change, stop, and source change.
+     *
+     * `deleteAfterDelivery(false)` keeps the message armed as a safety net
+     * even if a reschedule is ever missed; the wrap handler's own seek
+     * cancels and recreates it anyway. Delivery happens on the application
+     * looper because ExoPlayer must be called from there.
+     */
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    private fun rescheduleLoopMessage() {
+        loopMessage?.cancel()
+        loopMessage = null
+        val region = loopRegion ?: return
+
+        val exoEndMs = if (useSignalsmithForRate && signalsmithSpeed != 1.0f) {
+            lastSpeedChangePosition +
+                ((region.endMs - lastSpeedChangeContentPosition) / signalsmithSpeed).toLong()
+        } else {
+            region.endMs.toLong()
+        }
+
+        loopMessage = player
+            .createMessage { _, _ -> onLoopBoundaryReached() }
+            .setLooper(player.applicationLooper)
+            .setPosition(exoEndMs)
+            .setDeleteAfterDelivery(false)
+            .send()
+    }
+
+    private fun onLoopBoundaryReached() {
+        val region = loopRegion ?: return
+        performSeek(region.startMs.toLong())
+        wrappedPlayer.onLoopWrap(region.startMs)
     }
 
     /**
@@ -303,6 +393,11 @@ class ExoPlayerWrapper(
         lastSpeedChangePosition = 0
         lastSpeedChangeContentPosition = 0
         signalsmithSpeed = 1.0f
+
+        // Any pending loop message refers to the old timeline; recreate it
+        // against the new one (WrappedPlayer re-applies the region via
+        // configAndPrepare, but a stale message must not survive until then).
+        rescheduleLoopMessage()
 
         if (source is UrlSource) {
             player.setMediaItem(MediaItem.fromUri(source.url))

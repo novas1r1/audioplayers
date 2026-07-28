@@ -124,7 +124,10 @@ enum ReleaseMode: String {
     guard let currentItem = player.currentItem else {
       return
     }
-    await currentItem.seek(to: time)
+    // AVPlayer's default seek tolerance is unbounded, so a seek may land
+    // noticeably before or after the target. Loop wraps and loop-point seeks
+    // must land exactly on the requested position, so always seek precisely.
+    await currentItem.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero)
     if !self.isPlaying {
       self.player.pause()
     }

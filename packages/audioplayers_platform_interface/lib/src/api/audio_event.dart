@@ -6,6 +6,7 @@ enum AudioEventType {
   seekComplete,
   complete,
   prepared,
+  loopWrap,
 }
 
 /// Event emitted from the platform implementation.
@@ -19,6 +20,7 @@ class AudioEvent {
     this.duration,
     this.logMessage,
     this.isPrepared,
+    this.loopWrapPosition,
   });
 
   /// The type of the event.
@@ -33,6 +35,12 @@ class AudioEvent {
   /// Whether the source is prepared to be played.
   final bool? isPrepared;
 
+  /// Position the playhead wrapped to on a native loop-region wrap.
+  ///
+  /// Distinct from [AudioEventType.seekComplete] so that native wraps never
+  /// satisfy a pending user seek's completion future.
+  final Duration? loopWrapPosition;
+
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
@@ -41,7 +49,8 @@ class AudioEvent {
             eventType == other.eventType &&
             duration == other.duration &&
             logMessage == other.logMessage &&
-            isPrepared == other.isPrepared;
+            isPrepared == other.isPrepared &&
+            loopWrapPosition == other.loopWrapPosition;
   }
 
   @override
@@ -50,6 +59,7 @@ class AudioEvent {
         duration,
         logMessage,
         isPrepared,
+        loopWrapPosition,
       );
 
   @override
@@ -58,7 +68,8 @@ class AudioEvent {
         'eventType: $eventType, '
         'duration: $duration, '
         'logMessage: $logMessage, '
-        'isPrepared: $isPrepared'
+        'isPrepared: $isPrepared, '
+        'loopWrapPosition: $loopWrapPosition'
         ')';
   }
 }

@@ -125,6 +125,32 @@ void main() {
       expect(call.args['enabled'], false);
       expect(call.args['bpm'], null);
     });
+
+    test('#setLoopRegion', () async {
+      await platform.setLoopRegion(
+        'p1',
+        enabled: true,
+        startMs: 1500,
+        endMs: 4500,
+      );
+      final call = popLastCall();
+      expect(call.method, 'setLoopRegion');
+      expect(call.args, {
+        'playerId': 'p1',
+        'enabled': true,
+        'startMs': 1500,
+        'endMs': 4500,
+      });
+    });
+
+    test('#setLoopRegion disabled needs no bounds', () async {
+      await platform.setLoopRegion('p1', enabled: false);
+      final call = popLastCall();
+      expect(call.method, 'setLoopRegion');
+      expect(call.args['enabled'], false);
+      expect(call.args['startMs'], null);
+      expect(call.args['endMs'], null);
+    });
   });
 
   group('AudioPlayers Event Channel', () {
@@ -156,6 +182,10 @@ void main() {
           const AudioEvent(
             eventType: AudioEventType.seekComplete,
           ),
+          const AudioEvent(
+            eventType: AudioEventType.loopWrap,
+            loopWrapPosition: Duration(milliseconds: 1500),
+          ),
         ]),
       );
 
@@ -173,6 +203,10 @@ void main() {
         },
         <String, dynamic>{
           'event': 'audio.onSeekComplete',
+        },
+        <String, dynamic>{
+          'event': 'audio.onLoopWrap',
+          'value': 1500,
         },
       ];
       for (final byteData in byteDataList) {

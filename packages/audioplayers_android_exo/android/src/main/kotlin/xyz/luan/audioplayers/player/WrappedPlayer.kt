@@ -90,6 +90,16 @@ class WrappedPlayer internal constructor(
             }
         }
 
+    var loopRegion: LoopRegion? = null
+        set(value) {
+            if (field != value) {
+                field = value
+                if (!released) {
+                    player?.setLoopRegion(value)
+                }
+            }
+        }
+
     var releaseMode = ReleaseMode.RELEASE
         set(value) {
             if (field != value) {
@@ -280,6 +290,10 @@ class WrappedPlayer internal constructor(
         ref.handleSeekComplete(this)
     }
 
+    fun onLoopWrap(positionMs: Int) {
+        ref.handleLoopWrap(this, positionMs)
+    }
+
     fun handleLog(message: String) {
         ref.handleLog(this, message)
     }
@@ -304,6 +318,7 @@ class WrappedPlayer internal constructor(
         setLooping(isLooping)
         setPitchShift(pitchShift)
         setClickTrack(clickTrack)
+        setLoopRegion(loopRegion)
         prepare()
     }
 

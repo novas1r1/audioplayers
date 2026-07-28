@@ -141,6 +141,15 @@ class AudioPlayer {
   Stream<void> get onSeekComplete => eventStream
       .where((event) => event.eventType == AudioEventType.seekComplete);
 
+  /// Stream of native loop-region wraps (see [setLoopRegion]).
+  ///
+  /// Each event carries the position the playhead wrapped to (the loop
+  /// start). Deliberately separate from [onSeekComplete]: a native wrap must
+  /// never satisfy a pending user seek's completion future.
+  Stream<Duration> get onLoopWrap => eventStream
+      .where((event) => event.eventType == AudioEventType.loopWrap)
+      .map((event) => event.loopWrapPosition!);
+
   Stream<bool> get _onPrepared => eventStream
       .where((event) => event.eventType == AudioEventType.prepared)
       .map((event) => event.isPrepared!);
@@ -385,6 +394,27 @@ class AudioPlayer {
       beatsPerBar: beatsPerBar,
       pulsesPerBeat: pulsesPerBeat,
       volume: volume,
+    );
+  }
+
+  /// Configures a native gapless loop region: the platform player wraps the
+  /// playhead from [end] back to [start] on the playback engine side, without
+  /// a Dart round trip. Each wrap is reported on [onLoopWrap]. Pass
+  /// `enabled: false` to clear the region.
+  ///
+  /// Only supported on Android in this fork (PlayerMessage-scheduled wrap in
+  /// audioplayers_android_exo); other platforms throw [UnsupportedError].
+  Future<void> setLoopRegion({
+    required bool enabled,
+    Duration? start,
+    Duration? end,
+  }) async {
+    await creatingCompleter.future;
+    return _platform.setLoopRegion(
+      playerId,
+      enabled: enabled,
+      startMs: start?.inMilliseconds,
+      endMs: end?.inMilliseconds,
     );
   }
 

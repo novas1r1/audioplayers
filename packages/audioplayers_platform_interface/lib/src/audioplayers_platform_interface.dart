@@ -48,6 +48,18 @@ abstract class AudioplayersPlatformInterface extends PlatformInterface
     throw UnsupportedError('setClickTrack is not supported on this platform');
   }
 
+  /// Default implementation so platform packages that don't support the
+  /// native gapless loop region keep working without changes.
+  @override
+  Future<void> setLoopRegion(
+    String playerId, {
+    required bool enabled,
+    int? startMs,
+    int? endMs,
+  }) {
+    throw UnsupportedError('setLoopRegion is not supported on this platform');
+  }
+
   /// The default instance of [AudioplayersPlatformInterface] to use.
   ///
   /// Defaults to [AudioplayersPlatform].
@@ -139,6 +151,23 @@ abstract class MethodChannelAudioplayersPlatformInterface {
     int beatsPerBar,
     int pulsesPerBeat,
     double volume,
+  });
+
+  /// Configures a native gapless loop region: the platform player wraps the
+  /// playhead from [endMs] back to [startMs] on the playback engine side,
+  /// without a Dart round trip. Each wrap emits an
+  /// [AudioEventType.loopWrap] event carrying the wrap target position.
+  ///
+  /// Pass `enabled: false` to clear the region ([startMs]/[endMs] may be
+  /// omitted then).
+  ///
+  /// Only supported on Android (audioplayers_android_exo); other platforms
+  /// throw [UnsupportedError].
+  Future<void> setLoopRegion(
+    String playerId, {
+    required bool enabled,
+    int? startMs,
+    int? endMs,
   });
 
   /// Configures the player to read the audio from a URL.
