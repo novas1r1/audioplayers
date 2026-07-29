@@ -1,3 +1,8 @@
+// References Flutter-dependent plugin types (AudioplayersDarwinPlugin,
+// AudioPlayersStreamHandler); guarded so `swift test` can build the pure-DSP
+// click-track sources on a bare Mac. Real app builds always satisfy this.
+#if canImport(Flutter) || canImport(FlutterMacOS)
+
 import AVKit
 
 private let defaultPlaybackRate: Double = 1.0
@@ -29,6 +34,22 @@ enum ReleaseMode: String {
 
   private var completionObserver: TimeObserver?
   private var playerItemStatusObservation: NSKeyValueObservation?
+
+  /// Click-track tap state for the current player item (nil when the item
+  /// has no tap, e.g. no audio track or tap creation failed).
+  private var clickTapContext: ClickTrackTapContext?
+
+  /// Metronome click configuration. Stored always (survives source swaps —
+  /// each new item's tap is seeded with it) and pushed to the live tap
+  /// immediately; mirrors the Android WrappedPlayer.clickTrack semantics.
+  var clickTrack: ClickTrackConfig? {
+    didSet {
+      guard clickTrack != oldValue else {
+        return
+      }
+      clickTapContext?.setConfig(clickTrack)
+    }
+  }
 
   init(
     reference: AudioplayersDarwinPlugin,
@@ -65,6 +86,10 @@ enum ReleaseMode: String {
       let playerItem = try createPlayerItem(url: url, isLocal: isLocal, mimeType: mimeType)
       // Need to observe item status immediately after creating:
       try await setUpPlayerItemStatusObservation(playerItem)
+      // The item is ready and not yet playing — the only safe moment to
+      // attach the click-track tap (mutating audioMix on a live item is a
+      // known crash source).
+      await attachClickTrackTap(to: playerItem)
       // Needs to be called after the preparation has completed.
       self.updateDuration()
 
@@ -195,6 +220,35 @@ enum ReleaseMode: String {
     return playerItem
   }
 
+  /// Attaches the metronome click tap to the item via an AVAudioMix, seeded
+  /// with the stored `clickTrack` config. On any failure the song still
+  /// plays — just without a native click track.
+  private func attachClickTrackTap(to playerItem: AVPlayerItem) async {
+    let audioTrack: AVAssetTrack?
+    if #available(iOS 15, macOS 12, *) {
+      audioTrack = try? await playerItem.asset.loadTracks(withMediaType: .audio).first
+    } else {
+      audioTrack = playerItem.asset.tracks(withMediaType: .audio).first
+    }
+    guard let audioTrack = audioTrack else {
+      eventHandler.onLog(
+        message: "ClickTrackTap: no audio track — click track unavailable for this item")
+      clickTapContext = nil
+      return
+    }
+
+    let context = ClickTrackTapContext(config: clickTrack)
+    guard let audioMix = ClickTrackTapFactory.makeAudioMix(track: audioTrack, context: context)
+    else {
+      eventHandler.onLog(
+        message: "ClickTrackTap: tap creation failed — click track unavailable for this item")
+      clickTapContext = nil
+      return
+    }
+    playerItem.audioMix = audioMix
+    clickTapContext = context
+  }
+
   private func setUpPlayerItemStatusObservation(
     _ playerItem: AVPlayerItem
   ) async throws {
@@ -257,6 +311,10 @@ enum ReleaseMode: String {
       NotificationCenter.default.removeObserver(cObserver.observer)
       completionObserver = nil
     }
+    // Drop our tap reference only — never mutate audioMix on a live item.
+    // The tap itself (and the retained context) is torn down by the item's
+    // deallocation via the finalize callback.
+    clickTapContext = nil
     player.replaceCurrentItem(with: nil)
     self.url = nil
   }
@@ -289,3 +347,5 @@ enum ReleaseMode: String {
     }
   }
 }
+
+#endif  // canImport(Flutter) || canImport(FlutterMacOS)

@@ -140,8 +140,8 @@ abstract class MethodChannelAudioplayersPlatformInterface {
   /// Pass `enabled: false` to turn the clicks off ([bpm] may be omitted
   /// then). [volume] is the click gain 0.0..1.0 relative to the song.
   ///
-  /// Only supported on Android (audioplayers_android_exo); other platforms
-  /// throw [UnsupportedError].
+  /// Supported on Android (audioplayers_android_exo) and iOS/macOS
+  /// (audioplayers_darwin); other platforms throw [UnsupportedError].
   Future<void> setClickTrack(
     String playerId, {
     required bool enabled,

@@ -29,6 +29,13 @@ let package = Package(
         // the following instructions to add them:
         // https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package
       ]
-    )
+    ),
+    // Tests cover the pure click-track DSP (ClickGrid/ClickSynth) and run
+    // via plain `swift test` — the Flutter-dependent sources are compiled
+    // out on a bare Mac by their canImport(Flutter) guards.
+    .testTarget(
+      name: "audioplayers_darwinTests",
+      dependencies: ["audioplayers_darwin"]
+    ),
   ]
 )

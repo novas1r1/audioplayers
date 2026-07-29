@@ -13,6 +13,8 @@ Pod::Spec.new do |s|
   s.source           = { :path => '.' }
   s.documentation_url = 'https://pub.dev/packages/audioplayers'
   s.source_files = 'audioplayers_darwin/Sources/audioplayers_darwin/**/*.swift'
+  # MTAudioProcessingTap (metronome click track) lives in MediaToolbox.
+  s.frameworks = 'MediaToolbox'
   s.ios.dependency 'Flutter'
   s.osx.dependency 'FlutterMacOS'
   s.ios.deployment_target = '13.0'

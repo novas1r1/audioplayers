@@ -373,8 +373,10 @@ class AudioPlayer {
   /// music across seeks, loops and speed changes. Pass `enabled: false` to
   /// turn the clicks off.
   ///
-  /// Only supported on Android in this fork (ClickTrackAudioProcessor in
-  /// audioplayers_android_exo); other platforms throw [UnsupportedError].
+  /// Supported on Android (ClickTrackAudioProcessor in
+  /// audioplayers_android_exo) and iOS/macOS (MTAudioProcessingTap in
+  /// audioplayers_darwin) in this fork; other platforms throw
+  /// [UnsupportedError].
   Future<void> setClickTrack({
     required bool enabled,
     int? bpm,

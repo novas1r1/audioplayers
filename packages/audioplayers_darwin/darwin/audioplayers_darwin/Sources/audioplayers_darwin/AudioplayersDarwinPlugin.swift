@@ -1,3 +1,8 @@
+// The whole file needs the Flutter framework; guarding it lets `swift test`
+// build the pure-DSP click-track sources on a bare Mac (where Flutter is not
+// importable). Real app builds always satisfy the condition.
+#if canImport(Flutter) || canImport(FlutterMacOS)
+
 import AVFoundation
 import AVKit
 
@@ -289,6 +294,32 @@ public class AudioplayersDarwinPlugin: NSObject, FlutterPlugin {
         return
       }
       player.setPlaybackRate(playbackRate: playbackRate)
+    } else if method == "setClickTrack" {
+      // Mirrors the Android arg parsing (AudioplayersPlugin.kt): disabled
+      // clears the config without reading the other args; bpm is required
+      // when enabled; the rest carry the Dart-side defaults.
+      let enabled = args["enabled"] as? Bool ?? false
+      if !enabled {
+        player.clickTrack = nil
+      } else {
+        guard let bpm = args["bpm"] as? Int else {
+          result(
+            FlutterError(
+              code: "DarwinAudioError",
+              message: "Error calling setClickTrack, bpm cannot be null when enabled",
+              details: nil))
+          return
+        }
+        player.clickTrack = ClickTrackConfig(
+          enabled: true,
+          bpm: bpm,
+          anchorMs: (args["anchorMs"] as? NSNumber)?.int64Value,
+          offsetMs: (args["offsetMs"] as? NSNumber)?.int64Value ?? 0,
+          beatsPerBar: args["beatsPerBar"] as? Int ?? 4,
+          pulsesPerBeat: args["pulsesPerBeat"] as? Int ?? 1,
+          volume: Float(args["volume"] as? Double ?? 1.0)
+        )
+      }
     } else if method == "setReleaseMode" {
       guard let releaseModeStr = args["releaseMode"] as? String else {
         result(
@@ -515,3 +546,5 @@ class GlobalAudioPlayersStreamHandler: NSObject, FlutterStreamHandler {
     eventChannel.setStreamHandler(nil)
   }
 }
+
+#endif  // canImport(Flutter) || canImport(FlutterMacOS)
