@@ -294,6 +294,18 @@ public class AudioplayersDarwinPlugin: NSObject, FlutterPlugin {
         return
       }
       player.setPlaybackRate(playbackRate: playbackRate)
+    } else if method == "setPitchShift" {
+      // Frequency multiplier (1.0 = unchanged). Mirrors the Android
+      // AudioplayersPlugin `setPitchShift` case; the app layer converts
+      // semitones → multiplier before sending.
+      guard let pitchShift = args["pitchShift"] as? Double else {
+        result(
+          FlutterError(
+            code: "DarwinAudioError",
+            message: "Error calling setPitchShift, pitchShift cannot be null", details: nil))
+        return
+      }
+      player.setPitchShift(pitchShift: pitchShift)
     } else if method == "setClickTrack" {
       // Mirrors the Android arg parsing (AudioplayersPlugin.kt): disabled
       // clears the config without reading the other args; bpm is required

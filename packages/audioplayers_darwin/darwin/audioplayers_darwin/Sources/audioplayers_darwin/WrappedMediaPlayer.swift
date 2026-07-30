@@ -7,6 +7,8 @@ import AVKit
 
 private let defaultPlaybackRate: Double = 1.0
 
+private let defaultPitchMultiplier: Double = 1.0
+
 private let defaultVolume: Double = 1.0
 
 private let defaultReleaseMode: ReleaseMode = ReleaseMode.release
@@ -48,6 +50,19 @@ enum ReleaseMode: String {
         return
       }
       clickTapContext?.setConfig(clickTrack)
+    }
+  }
+
+  /// Independent pitch shift as a frequency multiplier (1.0 = unchanged,
+  /// 2.0 = +1 octave). Stored always (survives source swaps — each new item's
+  /// tap is seeded with it) and pushed to the live tap immediately; mirrors the
+  /// Android WrappedPlayer.pitchShift semantics.
+  var pitchMultiplier: Double = defaultPitchMultiplier {
+    didSet {
+      guard pitchMultiplier != oldValue else {
+        return
+      }
+      clickTapContext?.setPitch(pitchMultiplier)
     }
   }
 
@@ -145,6 +160,13 @@ enum ReleaseMode: String {
     }
   }
 
+  /// Sets an independent pitch shift (frequency multiplier). Applied by the
+  /// Signalsmith stretcher inside the click-track tap; time-neutral, so it does
+  /// not affect playback rate or position. Matches the Android `setPitchShift`.
+  func setPitchShift(pitchShift: Double) {
+    self.pitchMultiplier = pitchShift
+  }
+
   func seek(time: CMTime) async {
     guard let currentItem = player.currentItem else {
       return
@@ -237,7 +259,7 @@ enum ReleaseMode: String {
       return
     }
 
-    let context = ClickTrackTapContext(config: clickTrack)
+    let context = ClickTrackTapContext(config: clickTrack, pitch: pitchMultiplier)
     guard let audioMix = ClickTrackTapFactory.makeAudioMix(track: audioTrack, context: context)
     else {
       eventHandler.onLog(

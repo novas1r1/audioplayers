@@ -14,9 +14,26 @@ let package = Package(
   ],
   dependencies: [],
   targets: [
+    // Objective-C++ bridge over the header-only Signalsmith Stretch library
+    // (independent pitch shifting). Kept in its own target because SwiftPM
+    // does not allow Swift and Objective-C++ in a single target; the
+    // CocoaPods build compiles the same sources into the one plugin module.
+    .target(
+      name: "SignalsmithBridge",
+      exclude: [
+        "vendor/signalsmith-stretch/LICENSE.txt",
+        "vendor/signalsmith-linear/LICENSE.txt",
+      ],
+      publicHeadersPath: "include",
+      cxxSettings: [
+        // Resolves `signalsmith-stretch/…` and (transitively)
+        // `signalsmith-linear/…` to the vendored headers.
+        .headerSearchPath("vendor")
+      ]
+    ),
     .target(
       name: "audioplayers_darwin",
-      dependencies: [],
+      dependencies: ["SignalsmithBridge"],
       resources: [
         // TODO: If your plugin requires a privacy manifest
         // (e.g. if it uses any required reason APIs), update the PrivacyInfo.xcprivacy file
@@ -37,5 +54,6 @@ let package = Package(
       name: "audioplayers_darwinTests",
       dependencies: ["audioplayers_darwin"]
     ),
-  ]
+  ],
+  cxxLanguageStandard: .cxx17
 )

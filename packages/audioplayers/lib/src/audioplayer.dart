@@ -359,8 +359,9 @@ class AudioPlayer {
   /// Sets the pitch shift as a frequency multiplier, independent of the
   /// playback rate (1.0 = unchanged, 2.0 = one octave up).
   ///
-  /// Only supported on Android in this fork (Signalsmith processor); other
-  /// platforms throw [UnsupportedError].
+  /// Implemented on Android (Signalsmith ExoPlayer processor) and iOS
+  /// (Signalsmith stage in the MTAudioProcessingTap). Platforms without a
+  /// native handler throw [UnsupportedError].
   Future<void> setPitchShift(double pitchShift) async {
     _pitchShift = pitchShift;
     await creatingCompleter.future;
