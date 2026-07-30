@@ -405,8 +405,11 @@ class AudioPlayer {
   /// a Dart round trip. Each wrap is reported on [onLoopWrap]. Pass
   /// `enabled: false` to clear the region.
   ///
-  /// Only supported on Android in this fork (PlayerMessage-scheduled wrap in
-  /// audioplayers_android_exo); other platforms throw [UnsupportedError].
+  /// Implemented natively on Android (PlayerMessage-scheduled wrap in
+  /// audioplayers_android_exo) and iOS/macOS (AVPlayer boundary-time observer
+  /// in audioplayers_darwin). Platforms without an implementation throw
+  /// [UnsupportedError] (or [MissingPluginException]); the caller is expected
+  /// to fall back to Dart-side wrapping.
   Future<void> setLoopRegion({
     required bool enabled,
     Duration? start,

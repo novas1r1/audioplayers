@@ -332,6 +332,16 @@ public class AudioplayersDarwinPlugin: NSObject, FlutterPlugin {
           volume: Float(args["volume"] as? Double ?? 1.0)
         )
       }
+    } else if method == "setLoopRegion" {
+      // Native loop region (mirrors the Android AudioplayersPlugin
+      // `setLoopRegion` case): the engine wraps at the boundary itself and
+      // reports each wrap via `audio.onLoopWrap`. `enabled == false` (or absent
+      // bounds) clears it; the Dart side then falls back to timer-driven
+      // wrapping. Bounds arrive as media-time ms (nullable ints).
+      let enabled = args["enabled"] as? Bool ?? false
+      let startMs = (args["startMs"] as? NSNumber)?.intValue
+      let endMs = (args["endMs"] as? NSNumber)?.intValue
+      player.setLoopRegion(enabled: enabled, startMs: startMs, endMs: endMs)
     } else if method == "setReleaseMode" {
       guard let releaseModeStr = args["releaseMode"] as? String else {
         result(
@@ -477,6 +487,14 @@ class AudioPlayersStreamHandler: NSObject, FlutterStreamHandler {
 
   func onSeekComplete() {
     sendEvent(["event": "audio.onSeekComplete"])
+  }
+
+  /// Emitted when the native loop region wraps the playhead back to its start.
+  /// Distinct from `onSeekComplete` so the Dart side can tell an engine-driven
+  /// wrap from a user seek; carries the wrap target in ms (`value`), matching
+  /// the Android emit `hashMapOf("value" to positionMs)`.
+  func onLoopWrap(positionMs: Int) {
+    sendEvent(["event": "audio.onLoopWrap", "value": positionMs] as [String: Any])
   }
 
   func onComplete() {

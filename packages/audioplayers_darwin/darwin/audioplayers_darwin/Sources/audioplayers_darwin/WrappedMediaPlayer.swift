@@ -66,6 +66,22 @@ enum ReleaseMode: String {
     }
   }
 
+  /// Native loop region in media-time ms. While set, a loop-end boundary
+  /// observer wraps the playhead from `endMs` back to `startMs` in-process —
+  /// no Dart timer and no `seek` platform-channel round trip — and reports each
+  /// wrap through `onLoopWrap`. Mirrors the Android ExoPlayer path
+  /// (`ExoPlayerWrapper.setLoopRegion`). The win over the Dart fallback is
+  /// purely *when* the wrap fires: here it fires as the boundary is traversed,
+  /// so the playhead no longer sails past the loop end (audible) while a Timer
+  /// fire + channel hop delivers the seek. The AVPlayer seek itself is
+  /// unchanged, so this is not sample-accurate gapless — it removes the
+  /// overshoot, not every seek artefact.
+  private var loopRegion: (startMs: Int, endMs: Int)?
+
+  /// Opaque token for the live loop-end boundary observer, or nil when no
+  /// region is armed / no item is loaded. Removed via `removeTimeObserver`.
+  private var loopBoundaryObserver: Any?
+
   init(
     reference: AudioplayersDarwinPlugin,
     eventHandler: AudioPlayersStreamHandler,
@@ -165,6 +181,74 @@ enum ReleaseMode: String {
   /// not affect playback rate or position. Matches the Android `setPitchShift`.
   func setPitchShift(pitchShift: Double) {
     self.pitchMultiplier = pitchShift
+  }
+
+  /// Sets or clears the native loop region. `enabled == false`, missing bounds,
+  /// or `endMs <= startMs` tears the region down; the Dart side then falls back
+  /// to its timer-driven wrapping. Bounds are in media-time ms — unlike Android
+  /// no rate compensation is needed, because AVPlayer's boundary observer works
+  /// in the item's own timeline regardless of `player.rate`.
+  func setLoopRegion(enabled: Bool, startMs: Int?, endMs: Int?) {
+    guard enabled, let startMs = startMs, let endMs = endMs, endMs > startMs else {
+      loopRegion = nil
+      refreshLoopBoundaryObserver()
+      return
+    }
+    loopRegion = (startMs: startMs, endMs: endMs)
+    refreshLoopBoundaryObserver()
+  }
+
+  /// (Re)installs the loop-end boundary observer against the current item.
+  /// Always removes the previous observer first, so it is safe to call
+  /// repeatedly. A boundary observer fires every time playback traverses the
+  /// boundary during normal playback — but not on a seek *over* it, which is
+  /// why the Dart watchdog still guards user seeks past the loop end. No re-arm
+  /// is needed on a rate change (the observer is in item time, not real time);
+  /// a source swap clears it via `reset()` and the app re-arms after loading.
+  private func refreshLoopBoundaryObserver() {
+    if let observer = loopBoundaryObserver {
+      player.removeTimeObserver(observer)
+      loopBoundaryObserver = nil
+    }
+    guard let region = loopRegion, player.currentItem != nil else {
+      return
+    }
+    let endTime = toCMTime(millis: region.endMs)
+    loopBoundaryObserver = player.addBoundaryTimeObserver(
+      forTimes: [NSValue(time: endTime)],
+      queue: .main
+    ) { [weak self] in
+      Task { @MainActor in
+        await self?.onLoopBoundaryReached()
+      }
+    }
+  }
+
+  /// Wrap handler: seek precisely back to the loop start and report an
+  /// `onLoopWrap` event — deliberately *not* `onSeekComplete`, matching Android
+  /// so the Dart side can tell an engine-driven wrap from a user-initiated
+  /// seek (`onLoopWrap` is surfaced as a seek the cubit never initiated).
+  private func onLoopBoundaryReached() async {
+    guard let region = loopRegion, let currentItem = player.currentItem else {
+      return
+    }
+    // Instrumentation for tuning loop seamlessness. `overshoot` = how far the
+    // playhead ran past the loop end before the boundary observer caught it
+    // (the old Dart-timer + channel path's main artefact — want this near 0).
+    // `seekMs` = wall-clock cost of the precise seek back (the AVPlayer buffer
+    // re-prime, the residual that a boundary observer can't remove). Surfaced
+    // via onLog → Dart debug log. Remove once the loop feels right on-device.
+    let firedAt = Date()
+    let overshoot = (getCurrentPosition() ?? region.endMs) - region.endMs
+    await currentItem.seek(
+      to: toCMTime(millis: region.startMs), toleranceBefore: .zero, toleranceAfter: .zero)
+    let seekMs = Int(Date().timeIntervalSince(firedAt) * 1000)
+    let landed = getCurrentPosition() ?? region.startMs
+    eventHandler.onLog(
+      message:
+        "loop wrap: overshoot=\(overshoot)ms past end(\(region.endMs)ms), seek=\(seekMs)ms, "
+        + "landed=\(landed)ms (target start=\(region.startMs)ms)")
+    eventHandler.onLoopWrap(positionMs: region.startMs)
   }
 
   func seek(time: CMTime) async {
@@ -333,6 +417,15 @@ enum ReleaseMode: String {
       NotificationCenter.default.removeObserver(cObserver.observer)
       completionObserver = nil
     }
+    // Drop the loop-end observer with the outgoing item and clear the region:
+    // a new item has an unrelated timeline, so the app re-arms loop mode (via
+    // `setLoopRegion`) after loading. Until it does, the Dart fallback wraps —
+    // safe — whereas keeping a stale region would seek to the wrong start.
+    if let observer = loopBoundaryObserver {
+      player.removeTimeObserver(observer)
+      loopBoundaryObserver = nil
+    }
+    loopRegion = nil
     // Drop our tap reference only — never mutate audioMix on a live item.
     // The tap itself (and the retained context) is torn down by the item's
     // deallocation via the finalize callback.
