@@ -232,22 +232,8 @@ enum ReleaseMode: String {
     guard let region = loopRegion, let currentItem = player.currentItem else {
       return
     }
-    // Instrumentation for tuning loop seamlessness. `overshoot` = how far the
-    // playhead ran past the loop end before the boundary observer caught it
-    // (the old Dart-timer + channel path's main artefact — want this near 0).
-    // `seekMs` = wall-clock cost of the precise seek back (the AVPlayer buffer
-    // re-prime, the residual that a boundary observer can't remove). Surfaced
-    // via onLog → Dart debug log. Remove once the loop feels right on-device.
-    let firedAt = Date()
-    let overshoot = (getCurrentPosition() ?? region.endMs) - region.endMs
     await currentItem.seek(
       to: toCMTime(millis: region.startMs), toleranceBefore: .zero, toleranceAfter: .zero)
-    let seekMs = Int(Date().timeIntervalSince(firedAt) * 1000)
-    let landed = getCurrentPosition() ?? region.startMs
-    eventHandler.onLog(
-      message:
-        "loop wrap: overshoot=\(overshoot)ms past end(\(region.endMs)ms), seek=\(seekMs)ms, "
-        + "landed=\(landed)ms (target start=\(region.startMs)ms)")
     eventHandler.onLoopWrap(positionMs: region.startMs)
   }
 
