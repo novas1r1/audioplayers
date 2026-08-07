@@ -231,6 +231,9 @@ class WrappedPlayer internal constructor(
         if (released) {
             return
         }
+        // Releasing abandons any seek deferred while unprepared; resolve it
+        // so the Dart future doesn't dangle.
+        resolveDeferredSeek()
         if (playing) {
             player?.stop()
         }
@@ -257,6 +260,21 @@ class WrappedPlayer internal constructor(
             -1
         } else {
             position
+        }
+    }
+
+    /**
+     * Resolves a seek that was deferred while unprepared ([seek] stores it
+     * in [shouldSeekTo]; [onPrepared] normally flushes it). Must be called
+     * on every path that abandons the pending seek — a playback/load error
+     * or a release — because the Dart `seek()` future waits for the
+     * seek-complete event and otherwise dangles until its 30 s timeout,
+     * freezing every operation queued behind it (pause, stop, loop wraps).
+     */
+    private fun resolveDeferredSeek() {
+        if (shouldSeekTo >= 0) {
+            shouldSeekTo = -1
+            ref.handleSeekComplete(this)
         }
     }
 
@@ -299,6 +317,11 @@ class WrappedPlayer internal constructor(
     }
 
     fun handleError(errorCode: String?, errorMessage: String?, errorDetails: Any?) {
+        // A failed load never reaches onPrepared, so a deferred seek would
+        // otherwise wait forever (RL: "song just stops" — one hung seek
+        // froze the app's whole seek queue for 30 s and silently halted
+        // loop restarts).
+        resolveDeferredSeek()
         ref.handleError(this, errorCode, errorMessage, errorDetails)
     }
 

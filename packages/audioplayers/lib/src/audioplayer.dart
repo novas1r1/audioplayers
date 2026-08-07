@@ -306,6 +306,15 @@ class AudioPlayer {
   Future<void> seek(Duration position) async {
     await creatingCompleter.future;
 
+    // Without a source there is nothing that could ever emit a seek-complete
+    // event: the platform defers the seek until the player is prepared, and
+    // no prepare is coming. Fail fast instead of dangling until
+    // [seekingTimeout] (30 s) while every operation queued behind the seek
+    // (pause, stop, loop wraps) is frozen with it.
+    if (_source == null) {
+      throw StateError('AudioPlayer.seek called while no source is set.');
+    }
+
     final futureSeekComplete =
         onSeekComplete.first.timeout(AudioPlayer.seekingTimeout);
     final futureSeek = _platform.seek(playerId, position);
